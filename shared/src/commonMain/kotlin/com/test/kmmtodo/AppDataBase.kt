@@ -1,26 +1,30 @@
 package com.test.kmmtodo
 
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import com.test.Database
 import com.test.TODOItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class AppDataBase(driverFactory: DriverFactory) {
     private val driver = driverFactory.createDriver()
     private val database = Database(driver)
     private val queries = database.toDoItemQueries
 
-    suspend fun insertItem(title: String) {
+    fun insertItem(title: String) {
         queries.insert(null, title, false)
     }
 
-    suspend fun deleteItem(id: Long) {
+    fun deleteItem(id: Long) {
         queries.deleteById(id)
     }
 
-    suspend fun updateCheck(checked: Boolean, id: Long) {
+    fun updateCheck(checked: Boolean, id: Long) {
         queries.updateFinish(checked, id)
     }
 
-    suspend fun getAllItems(): List<TODOItem> {
-        return queries.selectAll().executeAsList()
-    }
+    fun getAllItemFlow() : Flow<List<TODOItem>> = queries.selectAll().asFlow().mapToList(Dispatchers.Main)
+
 }

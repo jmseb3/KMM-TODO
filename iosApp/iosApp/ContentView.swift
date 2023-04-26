@@ -13,40 +13,22 @@ struct ContentView: View {
                 TextField("enter TODO Title", text: $fieldText)
                 Spacer()
                 Button("ADD") {
-                    appDataBase.insertItem(title: fieldText) { error in
-                        updateItem(error: error) {
-                            fieldText = ""
-                        }
-                    }
+                    appDataBase.insertItem(title: fieldText)
                 }
             }.padding(10)
             ForEach(itemList,id:\.self) { item in
                 ToDoRow(item: item) {
-                    appDataBase.deleteItem(id: item.id) { error in
-                        updateItem(error: error)
-                    }
+                    appDataBase.deleteItem(id: item.id)
                 } updateToggle: {
-                    appDataBase.updateCheck(checked: !item.isFinish, id: item.id) { error in
-                        updateItem(error: error)
-                    }
+                    appDataBase.updateCheck(checked: !item.isFinish, id: item.id)
                 }
-                
             }
             Spacer()
         }.onAppear {
-            updateItem(error:nil)
-        }
-    }
-    
-    func updateItem(error: Error?,otherAction :@escaping ()->Void = {}) {
-        if let error = error {
-            print(error)
-        } else {
-            appDataBase.getAllItems { list, error in
-                if let itemList = list {
-                    self.itemList = itemList
-                    otherAction()
-                }
+            appDataBase.getAllItemFlow().collect(collector: Collector<[TODOItem]> {value in
+                self.itemList = value
+            }) { error in
+                print(error ?? "")
             }
         }
     }

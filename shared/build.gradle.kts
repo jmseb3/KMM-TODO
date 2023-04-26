@@ -28,6 +28,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("app.cash.sqldelight:primitive-adapters:$sqlDelightVersion")
+                implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVersion")
             }
         }
         val commonTest by getting {
